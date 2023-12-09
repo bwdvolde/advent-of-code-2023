@@ -22,8 +22,7 @@ fn main() {
     let content = fs::read_to_string("input.txt").unwrap();
 
     let regex = Regex::new(r"Game (?P<game>\d+): (?P<sets>.*)").unwrap();
-    let mut games: Vec<Game> = Vec::new();
-    for line in content.lines() {
+    let games: Vec<Game> = content.lines().map(|line| {
         let captures = regex.captures(line).unwrap();
 
         let id: i32 = captures["game"].parse().unwrap();
@@ -38,9 +37,8 @@ fn main() {
                     amount_green: 0,
                 };
                 unparsed_set.split(", ").for_each(|cube_with_amount| {
-                    let mut iter = cube_with_amount.split(" ");
-                    let amount: i32 = iter.next().unwrap().parse().unwrap();
-                    let name = iter.next().unwrap();
+                    let (amount, name) = cube_with_amount.split_once(" ").unwrap();
+                    let amount: i32 = amount.parse().unwrap();
                     match name {
                         "red" => set.amount_red += amount,
                         "blue" => set.amount_blue += amount,
@@ -51,11 +49,8 @@ fn main() {
                 set
             }).collect();
 
-        games.push(Game {
-            id,
-            sets,
-        });
-    }
+        Game { id, sets }
+    }).collect();
 
     let sum_of_valid_game_ids: i32 = games
         .iter()
